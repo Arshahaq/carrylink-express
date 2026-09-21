@@ -56,7 +56,17 @@ export function subscribe(listener: () => void) {
 }
 
 export function resetState() {
-  state = initialState;
+  state = {
+    ...initialState,
+    users: initialState.users.map((user) => ({ ...user })),
+    shipments: initialState.shipments.map((shipment) => ({ ...shipment, custody: shipment.custody.map((event) => ({ ...event })) })),
+    flights: initialState.flights.map((flight) => ({ ...flight })),
+    matches: initialState.matches.map((match) => ({ ...match })),
+    notifications: initialState.notifications.map((notification) => ({ ...notification })),
+    threads: initialState.threads.map((thread) => ({ ...thread })),
+    messages: initialState.messages.map((message) => ({ ...message })),
+    adminActions: initialState.adminActions.map((action) => ({ ...action })),
+  };
   persist();
   emit();
 }

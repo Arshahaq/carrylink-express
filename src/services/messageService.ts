@@ -1,4 +1,5 @@
 import { getState, setState, uid } from "./store";
+import { notify } from "./notificationService";
 import { detectMessageRisk } from "./verificationService";
 import type { Message } from "@/types";
 
@@ -23,8 +24,29 @@ export function sendMessage(threadId: string, authorId: string, body: string) {
     body,
     createdAt: new Date().toISOString(),
     flagged: risk.flagged,
+    ...(risk.keyword ? { riskKeyword: risk.keyword } : {}),
   };
   setState((prev) => ({ ...prev, messages: [...prev.messages, message] }));
+  if (risk.flagged) {
+    const thread = getState().threads.find((candidate) => candidate.id === threadId);
+    const shipment = thread ? getState().shipments.find((candidate) => candidate.code === thread.shipmentCode) : undefined;
+    if (shipment) {
+      setState((prev) => ({
+        ...prev,
+        shipments: prev.shipments.map((candidate) =>
+          candidate.id === shipment.id
+            ? { ...candidate, flagged: true, risk: candidate.risk === "high" ? "high" : "medium", riskReason: `Suspicious message phrase: ${risk.keyword}` }
+            : candidate,
+        ),
+      }));
+      notify("u-admin", {
+        icon: "warning",
+        title: "Risk detected in shipment chat",
+        body: `${shipment.code} contains a suspicious phrase. Automated demo risk detection flagged the message.`,
+        link: `/shipments/${shipment.id}`,
+      });
+    }
+  }
   return { message, risk };
 }
 

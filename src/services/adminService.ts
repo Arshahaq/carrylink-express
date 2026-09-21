@@ -1,7 +1,7 @@
 import { getState, setState, uid } from "./store";
 import { notify } from "./notificationService";
 import { addCustodyEvent, updateShipment } from "./shipmentService";
-import type { RiskLevel } from "@/types";
+import type { RiskLevel, Shipment, ShipmentStatus } from "@/types";
 
 function record(action: string, target: string) {
   setState((prev) => ({
@@ -17,6 +17,24 @@ function record(action: string, target: string) {
       ...prev.adminActions,
     ],
   }));
+}
+
+function notifyAdmin(title: string, body: string, link: string) {
+  notify("u-admin", { icon: "warning", title, body, link });
+}
+
+function audit(id: string, label: string, method: string) {
+  addCustodyEvent(id, label, method);
+}
+
+export function riskProfile(shipment: Shipment): { risk: RiskLevel; reason: string } {
+  if (shipment.status === "frozen" || shipment.flagged || shipment.risk === "high") {
+    return { risk: "high", reason: shipment.riskReason ?? "Shipment is flagged for operations review." };
+  }
+  if (shipment.eligibility.status === "review" || shipment.descriptionEdits > 0 || shipment.risk === "medium") {
+    return { risk: "medium", reason: shipment.riskReason ?? "Manual verification or additional information is required." };
+  }
+  return { risk: "low", reason: "No elevated risk indicators in the demo state." };
 }
 
 export function adminStats() {
@@ -43,7 +61,7 @@ export function approveShipment(id: string) {
     adminNote: "Approved by operations (demo review).",
     eligibility: { ...shipment.eligibility, status: "eligible", requiredDocuments: [] },
   });
-  addCustodyEvent(id, "Verification Cleared", "Operations review");
+  audit(id, "Verification Approved", "Demo operations review");
   record("Approved shipment", shipment.code);
   notify(shipment.senderId, {
     icon: "verified",
@@ -51,6 +69,7 @@ export function approveShipment(id: string) {
     body: `${shipment.code} cleared review and is ready for matching.`,
     link: `/shipments/${id}`,
   });
+  notifyAdmin("Demo verification approved", `${shipment.code} was approved by operations.`, `/shipments/${id}`);
 }
 
 export function rejectShipment(id: string) {
@@ -61,6 +80,7 @@ export function rejectShipment(id: string) {
     adminNote: "Rejected by operations (demo review).",
     eligibility: { ...shipment.eligibility, status: "rejected" },
   });
+  audit(id, "Verification Rejected", "Demo operations review");
   record("Rejected shipment", shipment.code);
   notify(shipment.senderId, {
     icon: "warning",
@@ -68,6 +88,7 @@ export function rejectShipment(id: string) {
     body: `${shipment.code} cannot be accepted under current platform rules.`,
     link: `/shipments/${id}`,
   });
+  notifyAdmin("Demo verification rejected", `${shipment.code} was rejected by operations.`, `/shipments/${id}`);
 }
 
 export function requestInformation(id: string) {
@@ -77,6 +98,7 @@ export function requestInformation(id: string) {
     status: "verification-required",
     adminNote: "Additional information requested from sender.",
   });
+  audit(id, "Verification Requested", "Demo operations review");
   record("Requested information", shipment.code);
   notify(shipment.senderId, {
     icon: "warning",
@@ -84,13 +106,22 @@ export function requestInformation(id: string) {
     body: `Operations need more details for ${shipment.code}.`,
     link: `/shipments/${id}`,
   });
+  notifyAdmin("Verification information requested", `${shipment.code} needs additional information.`, `/shipments/${id}`);
 }
 
 export function freezeShipment(id: string) {
   const shipment = getState().shipments.find((s) => s.id === id);
-  if (!shipment) return;
-  updateShipment(id, { status: "frozen", flagged: true, risk: "high", adminNote: "Shipment frozen pending review." });
-  addCustodyEvent(id, "Shipment Frozen", "Operations risk review");
+  if (!shipment || shipment.status === "delivered" || shipment.status === "frozen") return;
+  updateShipment(id, {
+    status: "frozen",
+    flagged: true,
+    risk: "high",
+    frozenFromStatus: shipment.status,
+    frozenPreviousRisk: shipment.risk,
+    frozenPreviousFlagged: shipment.flagged,
+    adminNote: "Shipment frozen pending review.",
+  });
+  audit(id, "Shipment Frozen by Operations", "Demo operations risk review");
   record("Froze shipment", shipment.code);
   notify(shipment.senderId, {
     icon: "warning",
@@ -98,6 +129,33 @@ export function freezeShipment(id: string) {
     body: `${shipment.code} is frozen pending an operations review.`,
     link: `/shipments/${id}`,
   });
+  if (shipment.travelerId) {
+    notify(shipment.travelerId, {
+      icon: "warning",
+      title: "Shipment frozen by operations",
+      body: `${shipment.code} is temporarily paused pending demo review.`,
+      link: `/shipments/${id}`,
+    });
+  }
+  notifyAdmin("Shipment frozen", `${shipment.code} was frozen by operations.`, `/shipments/${id}`);
+}
+
+export function unfreezeShipment(id: string) {
+  const shipment = getState().shipments.find((s) => s.id === id);
+  if (!shipment || shipment.status !== "frozen") return;
+  const restoredStatus = shipment.frozenFromStatus ?? "awaiting-match";
+  const restoredRisk = shipment.frozenPreviousRisk ?? "low";
+  const restoredFlagged = shipment.frozenPreviousFlagged ?? false;
+  updateShipment(id, {
+    status: restoredStatus,
+    risk: restoredRisk,
+    flagged: restoredFlagged,
+    adminNote: "Shipment unfrozen by operations (demo action).",
+  });
+  audit(id, "Shipment Unfrozen", "Demo operations review");
+  record("Unfroze shipment", shipment.code);
+  notify(shipment.senderId, { icon: "verified", title: "Shipment unfrozen", body: `${shipment.code} is active again after operations review.`, link: `/shipments/${id}` });
+  if (shipment.travelerId) notify(shipment.travelerId, { icon: "verified", title: "Shipment unfrozen", body: `${shipment.code} is active again after operations review.`, link: `/shipments/${id}` });
 }
 
 export function clearFlag(id: string) {
@@ -112,8 +170,20 @@ export function clearFlag(id: string) {
   record("Cleared flag", shipment.code);
 }
 
+export function markRiskReviewed(id: string) {
+  const shipment = getState().shipments.find((s) => s.id === id);
+  if (!shipment) return;
+  audit(id, "Risk Reviewed", "Demo operations risk review");
+  record("Reviewed risk", shipment.code);
+}
+
 export function setRisk(id: string, risk: RiskLevel, reason: string) {
+  const shipment = getState().shipments.find((candidate) => candidate.id === id);
+  if (!shipment) return;
   updateShipment(id, { risk, riskReason: reason, flagged: risk !== "low" });
+  if (risk !== "low") {
+    notifyAdmin("Risk detected", `${shipment.code}: ${reason}`, `/shipments/${id}`);
+  }
 }
 
 export function setUserStatus(userId: string, status: "active" | "suspended") {
@@ -123,6 +193,17 @@ export function setUserStatus(userId: string, status: "active" | "suspended") {
     users: prev.users.map((u) => (u.id === userId ? { ...u, status } : u)),
   }));
   record(status === "suspended" ? "Suspended user" : "Reactivated user", user?.name ?? userId);
+}
+
+export function toggleUserFlag(userId: string) {
+  const user = getState().users.find((candidate) => candidate.id === userId);
+  if (!user) return;
+  const demoFlagged = !user.demoFlagged;
+  setState((prev) => ({
+    ...prev,
+    users: prev.users.map((candidate) => (candidate.id === userId ? { ...candidate, demoFlagged } : candidate)),
+  }));
+  record(demoFlagged ? "Flagged demo account" : "Unflagged demo account", user.name);
 }
 
 export function analyticsData() {
@@ -145,22 +226,18 @@ export function analyticsData() {
     .sort((a, b) => b.value - a.value)
     .slice(0, 5);
 
-  const monthly = [
-    { month: "Apr", shipments: 18, delivered: 15 },
-    { month: "May", shipments: 24, delivered: 21 },
-    { month: "Jun", shipments: 31, delivered: 27 },
-    { month: "Jul", shipments: 29, delivered: 26 },
-    { month: "Aug", shipments: 38, delivered: 34 },
-    { month: "Sep", shipments: 44, delivered: 36 },
-  ];
+  const monthly = Object.entries(
+    shipments.reduce<Record<string, { shipments: number; delivered: number }>>((acc, shipment) => {
+      const month = new Date(shipment.createdAt).toLocaleDateString("en-US", { month: "short" });
+      acc[month] ??= { shipments: 0, delivered: 0 };
+      acc[month].shipments += 1;
+      if (shipment.status === "delivered") acc[month].delivered += 1;
+      return acc;
+    }, {}),
+  ).map(([month, values]) => ({ month, ...values }));
 
   const participation = [
-    { month: "Apr", travelers: 12 },
-    { month: "May", travelers: 15 },
-    { month: "Jun", travelers: 19 },
-    { month: "Jul", travelers: 22 },
-    { month: "Aug", travelers: 26 },
-    { month: "Sep", travelers: 20 + flights.length },
+    { month: "Current", travelers: new Set(flights.map((flight) => flight.travelerId)).size },
   ];
 
   return {
@@ -174,6 +251,17 @@ export function analyticsData() {
       { name: "Matched", value: shipments.filter((s) => s.status === "matched").length },
       { name: "Verification", value: shipments.filter((s) => s.status === "verification-required").length },
       { name: "Awaiting match", value: shipments.filter((s) => s.status === "awaiting-match").length },
+    ].filter((d) => d.value > 0),
+    eligibilitySplit: [
+      { name: "Eligible", value: shipments.filter((s) => s.eligibility.status === "eligible").length },
+      { name: "Review", value: shipments.filter((s) => s.eligibility.status === "review").length },
+      { name: "Rejected", value: shipments.filter((s) => s.eligibility.status === "rejected").length },
+      { name: "Unchecked", value: shipments.filter((s) => s.eligibility.status === "unchecked").length },
+    ].filter((d) => d.value > 0),
+    riskSplit: [
+      { name: "Low", value: shipments.filter((s) => riskProfile(s).risk === "low").length },
+      { name: "Medium", value: shipments.filter((s) => riskProfile(s).risk === "medium").length },
+      { name: "High", value: shipments.filter((s) => riskProfile(s).risk === "high").length },
     ].filter((d) => d.value > 0),
   };
 }

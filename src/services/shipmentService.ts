@@ -44,11 +44,15 @@ export const STATUS_TONES: Record<ShipmentStatus, StatusTone> = {
 export const TIMELINE_STEPS = [
   "Shipment Created",
   "Eligibility Checked",
+  "Traveler Request Sent",
   "Traveler Matched",
+  "Traveler Accepted",
+  "Handover Confirmed",
   "Handover Completed",
   "In Transit",
   "Destination Arrival",
   "Recipient Verification",
+  "Delivery Confirmed",
   "Delivered",
 ];
 
@@ -190,7 +194,7 @@ export function requestHandover(shipmentId: string, travelerId: string, flightId
   const state = getState();
   const traveler = state.users.find((u) => u.id === travelerId);
   const shipment = shipmentById(shipmentId);
-  if (!traveler || !shipment) return;
+  if (!traveler || !shipment || shipment.status === "frozen" || shipment.status === "delivered") return;
 
   updateShipment(shipmentId, {
     travelerId,
@@ -198,7 +202,7 @@ export function requestHandover(shipmentId: string, travelerId: string, flightId
     flightId,
     status: "matched",
   });
-  addCustodyEvent(shipmentId, "Traveler Matched", "Smart matching engine");
+  addCustodyEvent(shipmentId, "Traveler Request Sent", "Smart matching engine");
   setState((prev) => ({
     ...prev,
     matches: prev.matches.map((m) =>
@@ -208,8 +212,8 @@ export function requestHandover(shipmentId: string, travelerId: string, flightId
 
   notify(travelerId, {
     icon: "package",
-    title: "New handover request",
-    body: `${shipment.item.name} · ${shipment.route.fromCity.split(",")[0]} → ${shipment.route.toCity.split(",")[0]}`,
+    title: "New shipment request",
+    body: `This shipment matches your upcoming flight: ${shipment.item.name} · ${shipment.route.fromCity.split(",")[0]} → ${shipment.route.toCity.split(",")[0]}`,
     link: `/traveler/requests/${shipmentId}`,
   });
   notify(shipment.senderId, {
@@ -224,7 +228,7 @@ export function acceptRequest(shipmentId: string, travelerId: string, flightId: 
   const state = getState();
   const traveler = state.users.find((u) => u.id === travelerId);
   const shipment = shipmentById(shipmentId);
-  if (!traveler || !shipment) return;
+  if (!traveler || !shipment || shipment.status === "frozen" || shipment.status === "delivered") return;
 
   updateShipment(shipmentId, {
     travelerId,
@@ -232,7 +236,7 @@ export function acceptRequest(shipmentId: string, travelerId: string, flightId: 
     flightId,
     status: "handover-pending",
   });
-  addCustodyEvent(shipmentId, "Traveler Matched", "Traveler acceptance");
+  addCustodyEvent(shipmentId, "Traveler Accepted", "Traveler acceptance");
 
   const existingThread = state.threads.find(
     (t) => t.shipmentCode === shipment.code && t.participantIds.includes(travelerId),
@@ -259,6 +263,12 @@ export function acceptRequest(shipmentId: string, travelerId: string, flightId: 
     body: `${traveler.name} accepted ${shipment.code}. Handover is now pending.`,
     link: `/shipments/${shipmentId}`,
   });
+  notify("u-admin", {
+    icon: "verified",
+    title: "Traveler accepted shipment",
+    body: `${shipment.code} was accepted by ${traveler.name}.`,
+    link: `/shipments/${shipmentId}`,
+  });
   notify(travelerId, {
     icon: "package",
     title: "Handover scheduled",
@@ -283,10 +293,11 @@ export function declineRequest(shipmentId: string, travelerId: string) {
   });
 }
 
-export function completeHandover(shipmentId: string) {
+export function completeHandover(shipmentId: string, otp: string, condition = "Good") {
   const shipment = shipmentById(shipmentId);
-  if (!shipment) return;
-  addCustodyEvent(shipmentId, "Handover Completed", "QR + OTP + timestamp");
+  if (!shipment || !shipment.travelerId || !shipment.flightId || !["matched", "handover-pending"].includes(shipment.status)) return false;
+  if (otp !== DEMO_OTP) return false;
+  addCustodyEvent(shipmentId, "Handover Confirmed", `Simulated QR + OTP · condition: ${condition}`);
   updateShipment(shipmentId, { status: "in-transit" });
   addCustodyEvent(shipmentId, "In Transit", "Traveler confirmation");
   notify(shipment.senderId, {
@@ -295,17 +306,30 @@ export function completeHandover(shipmentId: string) {
     body: `${shipment.code} is now in transit (demo flight status).`,
     link: `/shipments/${shipmentId}`,
   });
+  notify(shipment.travelerId, {
+    icon: "verified",
+    title: "Shipment handover confirmed",
+    body: `${shipment.code} is now in transit.`,
+    link: `/shipments/${shipmentId}`,
+  });
+  notify("u-admin", {
+    icon: "flight",
+    title: "Shipment entered transit",
+    body: `${shipment.code} is now in transit after demo handover confirmation.`,
+    link: `/shipments/${shipmentId}`,
+  });
   notify(shipment.senderId, {
     icon: "otp",
     title: "Delivery OTP generated",
     body: `Share OTP ${DEMO_OTP} with the recipient at delivery.`,
     link: `/shipments/${shipmentId}/delivery`,
   });
+  return true;
 }
 
 export function markArrived(shipmentId: string) {
   const shipment = shipmentById(shipmentId);
-  if (!shipment) return;
+  if (!shipment || shipment.status !== "in-transit") return;
   addCustodyEvent(shipmentId, "Destination Arrival", "Demo flight status");
   updateShipment(shipmentId, { status: "arrived" });
   notify(shipment.senderId, {
@@ -316,11 +340,12 @@ export function markArrived(shipmentId: string) {
   });
 }
 
-export function confirmDelivery(shipmentId: string, condition: string) {
+export function confirmDelivery(shipmentId: string, otp: string, condition: string) {
   const shipment = shipmentById(shipmentId);
-  if (!shipment) return;
-  addCustodyEvent(shipmentId, "Recipient Verification", "OTP + QR");
-  addCustodyEvent(shipmentId, "Delivered", `Recipient confirmation · condition: ${condition}`);
+  if (!shipment || !shipment.travelerId || !["in-transit", "arrived"].includes(shipment.status)) return false;
+  if (otp !== DEMO_OTP) return false;
+  addCustodyEvent(shipmentId, "Recipient Verification", "Demo delivery OTP");
+  addCustodyEvent(shipmentId, "Delivery Confirmed", `Recipient confirmation · condition: ${condition}`);
   updateShipment(shipmentId, { status: "delivered" });
 
   setState((prev) => ({
@@ -334,18 +359,25 @@ export function confirmDelivery(shipmentId: string, condition: string) {
 
   notify(shipment.senderId, {
     icon: "verified",
-    title: "Shipment delivered",
+    title: "Shipment delivered successfully",
     body: `${shipment.code} was delivered to ${shipment.recipientName}.`,
     link: `/shipments/${shipmentId}`,
   });
   if (shipment.travelerId) {
     notify(shipment.travelerId, {
       icon: "verified",
-      title: "Transfer completed",
-      body: `Reward of ₹${shipment.rewardInr.toLocaleString("en-IN")} recorded (demo payment).`,
+      title: "Delivery confirmed successfully",
+      body: `${shipment.code} is now marked delivered.`,
       link: `/shipments/${shipmentId}`,
     });
   }
+  notify("u-admin", {
+    icon: "verified",
+    title: "Delivery confirmed",
+    body: `${shipment.code} was marked delivered in the demo workflow.`,
+    link: `/shipments/${shipmentId}`,
+  });
+  return true;
 }
 
 export function submitVerificationDocuments(shipmentId: string) {

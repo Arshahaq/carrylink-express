@@ -10,12 +10,41 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as MessagesRouteImport } from './routes/messages'
+import { Route as NotificationsRouteImport } from './routes/notifications'
+import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as SecurityRouteImport } from './routes/security'
 import { Route as SelectModeRouteImport } from './routes/select-mode'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAnalyticsRouteImport } from './routes/admin/analytics'
+import { Route as AdminMapRouteImport } from './routes/admin/map'
+import { Route as AdminRiskRouteImport } from './routes/admin/risk'
+import { Route as AdminShipmentsRouteImport } from './routes/admin/shipments'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as AdminVerificationRouteImport } from './routes/admin/verification'
+import { Route as SenderCreateRouteImport } from './routes/sender/create'
+import { Route as SenderDashboardRouteImport } from './routes/sender/dashboard'
+import { Route as SenderMatchesRouteImport } from './routes/sender/matches'
+import { Route as SenderShipmentsRouteImport } from './routes/sender/shipments'
+import { Route as ShipmentsShipmentIdRouteImport } from './routes/shipments/$shipmentId'
+import { Route as TravelerAddFlightRouteImport } from './routes/traveler/add-flight'
+import { Route as TravelerDashboardRouteImport } from './routes/traveler/dashboard'
+import { Route as TravelerDeliveriesRouteImport } from './routes/traveler/deliveries'
+import { Route as TravelerFlightsRouteImport } from './routes/traveler/flights'
+import { Route as TravelerRequestsRouteImport } from './routes/traveler/requests'
+import { Route as ShipmentsShipmentIdDeliveryRouteImport } from './routes/shipments/$shipmentId/delivery'
+import { Route as ShipmentsShipmentIdHandoverRouteImport } from './routes/shipments/$shipmentId/handover'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -23,40 +52,324 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MessagesRoute = MessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SecurityRoute = SecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SelectModeRoute = SelectModeRouteImport.update({
   id: '/select-mode',
   path: '/select-mode',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
+  id: '/analytics',
+  path: '/analytics',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminMapRoute = AdminMapRouteImport.update({
+  id: '/map',
+  path: '/map',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminRiskRoute = AdminRiskRouteImport.update({
+  id: '/risk',
+  path: '/risk',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminShipmentsRoute = AdminShipmentsRouteImport.update({
+  id: '/shipments',
+  path: '/shipments',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminVerificationRoute = AdminVerificationRouteImport.update({
+  id: '/verification',
+  path: '/verification',
+  getParentRoute: () => AdminRoute,
+} as any)
+const SenderCreateRoute = SenderCreateRouteImport.update({
+  id: '/sender/create',
+  path: '/sender/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SenderDashboardRoute = SenderDashboardRouteImport.update({
+  id: '/sender/dashboard',
+  path: '/sender/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SenderMatchesRoute = SenderMatchesRouteImport.update({
+  id: '/sender/matches',
+  path: '/sender/matches',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SenderShipmentsRoute = SenderShipmentsRouteImport.update({
+  id: '/sender/shipments',
+  path: '/sender/shipments',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShipmentsShipmentIdRoute = ShipmentsShipmentIdRouteImport.update({
+  id: '/shipments/$shipmentId',
+  path: '/shipments/$shipmentId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TravelerAddFlightRoute = TravelerAddFlightRouteImport.update({
+  id: '/traveler/add-flight',
+  path: '/traveler/add-flight',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TravelerDashboardRoute = TravelerDashboardRouteImport.update({
+  id: '/traveler/dashboard',
+  path: '/traveler/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TravelerDeliveriesRoute = TravelerDeliveriesRouteImport.update({
+  id: '/traveler/deliveries',
+  path: '/traveler/deliveries',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TravelerFlightsRoute = TravelerFlightsRouteImport.update({
+  id: '/traveler/flights',
+  path: '/traveler/flights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TravelerRequestsRoute = TravelerRequestsRouteImport.update({
+  id: '/traveler/requests',
+  path: '/traveler/requests',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ShipmentsShipmentIdDeliveryRoute =
+  ShipmentsShipmentIdDeliveryRouteImport.update({
+    id: '/delivery',
+    path: '/delivery',
+    getParentRoute: () => ShipmentsShipmentIdRoute,
+  } as any)
+const ShipmentsShipmentIdHandoverRoute =
+  ShipmentsShipmentIdHandoverRouteImport.update({
+    id: '/handover',
+    path: '/handover',
+    getParentRoute: () => ShipmentsShipmentIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRoute
+  '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
+  '/security': typeof SecurityRoute
   '/select-mode': typeof SelectModeRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/map': typeof AdminMapRoute
+  '/admin/risk': typeof AdminRiskRoute
+  '/admin/shipments': typeof AdminShipmentsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/verification': typeof AdminVerificationRoute
+  '/sender/create': typeof SenderCreateRoute
+  '/sender/dashboard': typeof SenderDashboardRoute
+  '/sender/matches': typeof SenderMatchesRoute
+  '/sender/shipments': typeof SenderShipmentsRoute
+  '/shipments/$shipmentId': typeof ShipmentsShipmentIdRouteWithChildren
+  '/traveler/add-flight': typeof TravelerAddFlightRoute
+  '/traveler/dashboard': typeof TravelerDashboardRoute
+  '/traveler/deliveries': typeof TravelerDeliveriesRoute
+  '/traveler/flights': typeof TravelerFlightsRoute
+  '/traveler/requests': typeof TravelerRequestsRoute
+  '/admin/': typeof AdminIndexRoute
+  '/shipments/$shipmentId/delivery': typeof ShipmentsShipmentIdDeliveryRoute
+  '/shipments/$shipmentId/handover': typeof ShipmentsShipmentIdHandoverRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRoute
+  '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
+  '/security': typeof SecurityRoute
   '/select-mode': typeof SelectModeRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/map': typeof AdminMapRoute
+  '/admin/risk': typeof AdminRiskRoute
+  '/admin/shipments': typeof AdminShipmentsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/verification': typeof AdminVerificationRoute
+  '/sender/create': typeof SenderCreateRoute
+  '/sender/dashboard': typeof SenderDashboardRoute
+  '/sender/matches': typeof SenderMatchesRoute
+  '/sender/shipments': typeof SenderShipmentsRoute
+  '/shipments/$shipmentId': typeof ShipmentsShipmentIdRouteWithChildren
+  '/traveler/add-flight': typeof TravelerAddFlightRoute
+  '/traveler/dashboard': typeof TravelerDashboardRoute
+  '/traveler/deliveries': typeof TravelerDeliveriesRoute
+  '/traveler/flights': typeof TravelerFlightsRoute
+  '/traveler/requests': typeof TravelerRequestsRoute
+  '/admin': typeof AdminIndexRoute
+  '/shipments/$shipmentId/delivery': typeof ShipmentsShipmentIdDeliveryRoute
+  '/shipments/$shipmentId/handover': typeof ShipmentsShipmentIdHandoverRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/login': typeof LoginRoute
+  '/messages': typeof MessagesRoute
+  '/notifications': typeof NotificationsRoute
+  '/profile': typeof ProfileRoute
+  '/security': typeof SecurityRoute
   '/select-mode': typeof SelectModeRoute
+  '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/map': typeof AdminMapRoute
+  '/admin/risk': typeof AdminRiskRoute
+  '/admin/shipments': typeof AdminShipmentsRoute
+  '/admin/users': typeof AdminUsersRoute
+  '/admin/verification': typeof AdminVerificationRoute
+  '/sender/create': typeof SenderCreateRoute
+  '/sender/dashboard': typeof SenderDashboardRoute
+  '/sender/matches': typeof SenderMatchesRoute
+  '/sender/shipments': typeof SenderShipmentsRoute
+  '/shipments/$shipmentId': typeof ShipmentsShipmentIdRouteWithChildren
+  '/traveler/add-flight': typeof TravelerAddFlightRoute
+  '/traveler/dashboard': typeof TravelerDashboardRoute
+  '/traveler/deliveries': typeof TravelerDeliveriesRoute
+  '/traveler/flights': typeof TravelerFlightsRoute
+  '/traveler/requests': typeof TravelerRequestsRoute
+  '/admin/': typeof AdminIndexRoute
+  '/shipments/$shipmentId/delivery': typeof ShipmentsShipmentIdDeliveryRoute
+  '/shipments/$shipmentId/handover': typeof ShipmentsShipmentIdHandoverRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/select-mode'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/messages'
+    | '/notifications'
+    | '/profile'
+    | '/security'
+    | '/select-mode'
+    | '/admin/analytics'
+    | '/admin/map'
+    | '/admin/risk'
+    | '/admin/shipments'
+    | '/admin/users'
+    | '/admin/verification'
+    | '/sender/create'
+    | '/sender/dashboard'
+    | '/sender/matches'
+    | '/sender/shipments'
+    | '/shipments/$shipmentId'
+    | '/traveler/add-flight'
+    | '/traveler/dashboard'
+    | '/traveler/deliveries'
+    | '/traveler/flights'
+    | '/traveler/requests'
+    | '/admin/'
+    | '/shipments/$shipmentId/delivery'
+    | '/shipments/$shipmentId/handover'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/select-mode'
-  id: '__root__' | '/' | '/login' | '/select-mode'
+  to:
+    | '/'
+    | '/login'
+    | '/messages'
+    | '/notifications'
+    | '/profile'
+    | '/security'
+    | '/select-mode'
+    | '/admin/analytics'
+    | '/admin/map'
+    | '/admin/risk'
+    | '/admin/shipments'
+    | '/admin/users'
+    | '/admin/verification'
+    | '/sender/create'
+    | '/sender/dashboard'
+    | '/sender/matches'
+    | '/sender/shipments'
+    | '/shipments/$shipmentId'
+    | '/traveler/add-flight'
+    | '/traveler/dashboard'
+    | '/traveler/deliveries'
+    | '/traveler/flights'
+    | '/traveler/requests'
+    | '/admin'
+    | '/shipments/$shipmentId/delivery'
+    | '/shipments/$shipmentId/handover'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/login'
+    | '/messages'
+    | '/notifications'
+    | '/profile'
+    | '/security'
+    | '/select-mode'
+    | '/admin/analytics'
+    | '/admin/map'
+    | '/admin/risk'
+    | '/admin/shipments'
+    | '/admin/users'
+    | '/admin/verification'
+    | '/sender/create'
+    | '/sender/dashboard'
+    | '/sender/matches'
+    | '/sender/shipments'
+    | '/shipments/$shipmentId'
+    | '/traveler/add-flight'
+    | '/traveler/dashboard'
+    | '/traveler/deliveries'
+    | '/traveler/flights'
+    | '/traveler/requests'
+    | '/admin/'
+    | '/shipments/$shipmentId/delivery'
+    | '/shipments/$shipmentId/handover'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   LoginRoute: typeof LoginRoute
+  MessagesRoute: typeof MessagesRoute
+  NotificationsRoute: typeof NotificationsRoute
+  ProfileRoute: typeof ProfileRoute
+  SecurityRoute: typeof SecurityRoute
   SelectModeRoute: typeof SelectModeRoute
+  SenderCreateRoute: typeof SenderCreateRoute
+  SenderDashboardRoute: typeof SenderDashboardRoute
+  SenderMatchesRoute: typeof SenderMatchesRoute
+  SenderShipmentsRoute: typeof SenderShipmentsRoute
+  ShipmentsShipmentIdRoute: typeof ShipmentsShipmentIdRouteWithChildren
+  TravelerAddFlightRoute: typeof TravelerAddFlightRoute
+  TravelerDashboardRoute: typeof TravelerDashboardRoute
+  TravelerDeliveriesRoute: typeof TravelerDeliveriesRoute
+  TravelerFlightsRoute: typeof TravelerFlightsRoute
+  TravelerRequestsRoute: typeof TravelerRequestsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -68,11 +381,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/messages': {
+      id: '/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof MessagesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/security': {
+      id: '/security'
+      path: '/security'
+      fullPath: '/security'
+      preLoaderRoute: typeof SecurityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/select-mode': {
@@ -82,13 +430,196 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SelectModeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/analytics': {
+      id: '/admin/analytics'
+      path: '/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AdminAnalyticsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/map': {
+      id: '/admin/map'
+      path: '/map'
+      fullPath: '/admin/map'
+      preLoaderRoute: typeof AdminMapRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/risk': {
+      id: '/admin/risk'
+      path: '/risk'
+      fullPath: '/admin/risk'
+      preLoaderRoute: typeof AdminRiskRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/shipments': {
+      id: '/admin/shipments'
+      path: '/shipments'
+      fullPath: '/admin/shipments'
+      preLoaderRoute: typeof AdminShipmentsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/verification': {
+      id: '/admin/verification'
+      path: '/verification'
+      fullPath: '/admin/verification'
+      preLoaderRoute: typeof AdminVerificationRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/sender/create': {
+      id: '/sender/create'
+      path: '/sender/create'
+      fullPath: '/sender/create'
+      preLoaderRoute: typeof SenderCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sender/dashboard': {
+      id: '/sender/dashboard'
+      path: '/sender/dashboard'
+      fullPath: '/sender/dashboard'
+      preLoaderRoute: typeof SenderDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sender/matches': {
+      id: '/sender/matches'
+      path: '/sender/matches'
+      fullPath: '/sender/matches'
+      preLoaderRoute: typeof SenderMatchesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sender/shipments': {
+      id: '/sender/shipments'
+      path: '/sender/shipments'
+      fullPath: '/sender/shipments'
+      preLoaderRoute: typeof SenderShipmentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shipments/$shipmentId': {
+      id: '/shipments/$shipmentId'
+      path: '/shipments/$shipmentId'
+      fullPath: '/shipments/$shipmentId'
+      preLoaderRoute: typeof ShipmentsShipmentIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/traveler/add-flight': {
+      id: '/traveler/add-flight'
+      path: '/traveler/add-flight'
+      fullPath: '/traveler/add-flight'
+      preLoaderRoute: typeof TravelerAddFlightRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/traveler/dashboard': {
+      id: '/traveler/dashboard'
+      path: '/traveler/dashboard'
+      fullPath: '/traveler/dashboard'
+      preLoaderRoute: typeof TravelerDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/traveler/deliveries': {
+      id: '/traveler/deliveries'
+      path: '/traveler/deliveries'
+      fullPath: '/traveler/deliveries'
+      preLoaderRoute: typeof TravelerDeliveriesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/traveler/flights': {
+      id: '/traveler/flights'
+      path: '/traveler/flights'
+      fullPath: '/traveler/flights'
+      preLoaderRoute: typeof TravelerFlightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/traveler/requests': {
+      id: '/traveler/requests'
+      path: '/traveler/requests'
+      fullPath: '/traveler/requests'
+      preLoaderRoute: typeof TravelerRequestsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/shipments/$shipmentId/delivery': {
+      id: '/shipments/$shipmentId/delivery'
+      path: '/delivery'
+      fullPath: '/shipments/$shipmentId/delivery'
+      preLoaderRoute: typeof ShipmentsShipmentIdDeliveryRouteImport
+      parentRoute: typeof ShipmentsShipmentIdRoute
+    }
+    '/shipments/$shipmentId/handover': {
+      id: '/shipments/$shipmentId/handover'
+      path: '/handover'
+      fullPath: '/shipments/$shipmentId/handover'
+      preLoaderRoute: typeof ShipmentsShipmentIdHandoverRouteImport
+      parentRoute: typeof ShipmentsShipmentIdRoute
+    }
   }
 }
 
+interface AdminRouteChildren {
+  AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminMapRoute: typeof AdminMapRoute
+  AdminRiskRoute: typeof AdminRiskRoute
+  AdminShipmentsRoute: typeof AdminShipmentsRoute
+  AdminUsersRoute: typeof AdminUsersRoute
+  AdminVerificationRoute: typeof AdminVerificationRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminMapRoute: AdminMapRoute,
+  AdminRiskRoute: AdminRiskRoute,
+  AdminShipmentsRoute: AdminShipmentsRoute,
+  AdminUsersRoute: AdminUsersRoute,
+  AdminVerificationRoute: AdminVerificationRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
+
+interface ShipmentsShipmentIdRouteChildren {
+  ShipmentsShipmentIdDeliveryRoute: typeof ShipmentsShipmentIdDeliveryRoute
+  ShipmentsShipmentIdHandoverRoute: typeof ShipmentsShipmentIdHandoverRoute
+}
+
+const ShipmentsShipmentIdRouteChildren: ShipmentsShipmentIdRouteChildren = {
+  ShipmentsShipmentIdDeliveryRoute: ShipmentsShipmentIdDeliveryRoute,
+  ShipmentsShipmentIdHandoverRoute: ShipmentsShipmentIdHandoverRoute,
+}
+
+const ShipmentsShipmentIdRouteWithChildren =
+  ShipmentsShipmentIdRoute._addFileChildren(ShipmentsShipmentIdRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   LoginRoute: LoginRoute,
+  MessagesRoute: MessagesRoute,
+  NotificationsRoute: NotificationsRoute,
+  ProfileRoute: ProfileRoute,
+  SecurityRoute: SecurityRoute,
   SelectModeRoute: SelectModeRoute,
+  SenderCreateRoute: SenderCreateRoute,
+  SenderDashboardRoute: SenderDashboardRoute,
+  SenderMatchesRoute: SenderMatchesRoute,
+  SenderShipmentsRoute: SenderShipmentsRoute,
+  ShipmentsShipmentIdRoute: ShipmentsShipmentIdRouteWithChildren,
+  TravelerAddFlightRoute: TravelerAddFlightRoute,
+  TravelerDashboardRoute: TravelerDashboardRoute,
+  TravelerDeliveriesRoute: TravelerDeliveriesRoute,
+  TravelerFlightsRoute: TravelerFlightsRoute,
+  TravelerRequestsRoute: TravelerRequestsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -19,6 +19,7 @@ export interface User {
   completedTransfers: number;
   rating: number;
   status: "active" | "suspended";
+  demoFlagged?: boolean;
   city: string;
 }
 
@@ -123,6 +124,9 @@ export interface Shipment {
   createdAt: string;
   updatedAt: string;
   adminNote?: string;
+  frozenFromStatus?: ShipmentStatus;
+  frozenPreviousRisk?: RiskLevel;
+  frozenPreviousFlagged?: boolean;
   descriptionEdits: number;
 }
 
@@ -130,6 +134,8 @@ export interface Flight {
   id: string;
   travelerId: string;
   travelerName: string;
+  airline?: string;
+  notes?: string;
   fromCity: string;
   fromAirport: string;
   toCity: string;
@@ -184,6 +190,7 @@ export interface Message {
   body: string;
   createdAt: string;
   flagged?: boolean;
+  riskKeyword?: string;
 }
 
 export interface Thread {

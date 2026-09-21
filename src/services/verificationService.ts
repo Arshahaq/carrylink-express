@@ -126,6 +126,7 @@ export function checkEligibility(item: ShipmentItem, route: ShipmentRoute): Elig
 }
 
 export const RISK_KEYWORDS = [
+  "declare this at customs",
   "don't declare",
   "dont declare",
   "do not declare",
@@ -135,6 +136,12 @@ export const RISK_KEYWORDS = [
   "dont tell customs",
   "hide",
   "unsealed",
+  "hide from customs",
+  "avoid customs",
+  "hide this",
+  "smuggle",
+  "carry secretly",
+  "no declaration",
 ];
 
 export function detectMessageRisk(body: string) {
